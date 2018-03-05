@@ -9,6 +9,10 @@ Util::Util()
 {
 }
 
+Util::~Util()
+{
+}
+
 string Util::trim(const string& str)
 {
 	std::locale loc;
@@ -17,6 +21,3 @@ string Util::trim(const string& str)
 	return str_no_ws;
 }
 
-Util::~Util()
-{
-}

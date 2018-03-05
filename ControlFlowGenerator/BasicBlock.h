@@ -7,6 +7,7 @@ using namespace std;
 
 class BasicBlock
 {
+
 public:
 	BasicBlock();
 	~BasicBlock();
@@ -16,8 +17,10 @@ public:
 
 	list<BasicBlock> getEdges();
 	void addEdge(BasicBlock basicBlock);
+
 private:
 	list<Line> lines;
 	list<BasicBlock> edges;
+
 };
 

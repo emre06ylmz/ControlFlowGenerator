@@ -3,17 +3,15 @@
 
 using namespace std;
 
-Line::Line() {
-	lineNumber = 0;
-	expression = "";
-}
-
 Line::Line(int _lineNumber, string _expression) {
 	lineNumber = _lineNumber;
 	expression = _expression;
 	lineType = 0;
 }
 
+Line::~Line()
+{
+}
 
 int Line::getLineNumber() {
 	return lineNumber;
@@ -28,8 +26,4 @@ int Line::getLineType() {
 
 void Line::setLineType(int _lineType) {
 	lineType = _lineType;
-}
-
-Line::~Line()
-{
 }

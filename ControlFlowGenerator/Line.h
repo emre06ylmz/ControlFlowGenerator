@@ -6,9 +6,7 @@ using namespace std;
 class Line
 {
 
-
 public:
-	Line();
 	Line(int _lineNumber, string _expression);
 	~Line();
 
@@ -16,6 +14,7 @@ public:
 	string getExpression();
 	int getLineType();
 	void setLineType(int _lineType);
+
 private: 
 	int lineNumber;
 	string expression;

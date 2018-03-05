@@ -7,6 +7,10 @@ BasicBlock::BasicBlock()
 {
 }
 
+BasicBlock::~BasicBlock()
+{
+}
+
 list<Line> BasicBlock::getLines() {
 	return lines;
 }
@@ -21,8 +25,4 @@ void BasicBlock::addLine(Line line) {
 
 void BasicBlock::addEdge(BasicBlock basicBlock) {
 	edges.push_back(basicBlock);
-}
-
-BasicBlock::~BasicBlock()
-{
 }

@@ -1,11 +1,11 @@
 #pragma once
 
 #include <string>
+
 using namespace std;
 
 class Constant
 {
-
 
 public:
 	Constant();
@@ -19,5 +19,6 @@ public:
 	static int LINE_TYPE_IF;
 	static int LINE_TYPE_WHILE;
 	static int LINE_TYPE_EXPRESSION;
+
 };
 
