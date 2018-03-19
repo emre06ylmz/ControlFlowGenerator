@@ -3,6 +3,9 @@
 
 using namespace std;
 
+Line::Line() {
+}
+
 Line::Line(int _lineNumber, string _expression) {
 	lineNumber = _lineNumber;
 	expression = _expression;

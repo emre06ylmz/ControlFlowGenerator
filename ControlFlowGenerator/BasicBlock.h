@@ -18,9 +18,12 @@ public:
 	list<BasicBlock> getEdges();
 	void addEdge(BasicBlock basicBlock);
 
+	int getLineType();
+	void setLineType(int _lineType);
 private:
 	list<Line> lines;
 	list<BasicBlock> edges;
+	int lineType;
 
 };
 

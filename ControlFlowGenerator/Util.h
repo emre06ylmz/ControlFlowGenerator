@@ -1,6 +1,9 @@
 #pragma once
 
 #include <string>
+#include "BasicBlock.h"
+#include "Constant.h"
+#include <locale>
 
 using namespace std;
 
@@ -12,6 +15,8 @@ public:
 	~Util();
 
 	static string trim(const string& str);
+	static BasicBlock createStartBasicBlock();
+	static BasicBlock createEndBasicBlock();
 
 };
 

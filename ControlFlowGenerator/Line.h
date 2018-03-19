@@ -7,6 +7,7 @@ class Line
 {
 
 public:
+	Line();
 	Line(int _lineNumber, string _expression);
 	~Line();
 

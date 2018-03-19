@@ -26,3 +26,11 @@ void BasicBlock::addLine(Line line) {
 void BasicBlock::addEdge(BasicBlock basicBlock) {
 	edges.push_back(basicBlock);
 }
+
+int BasicBlock::getLineType() {
+	return lineType;
+}
+
+void BasicBlock::setLineType(int _lineType) {
+	lineType = _lineType;
+}
