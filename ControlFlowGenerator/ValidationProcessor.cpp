@@ -21,40 +21,50 @@ list<Line> ValidationProcessor::readAndValidateInput(int argc, char* argv[]) {
 		return lines;
 	}
 
-
-	//contol first line of the program
-
-
 	//Create a file stream
 	ifstream sourceCode(argv[1]);
 	string line;
 	int lineNumber = 1;
 	//Read file line by line
+
+	bool isCommentFound = false;
+
 	while (getline(sourceCode, line))
 	{
 		//Trim line
 		string trimmedLine = Util::trim(line);
 
-		//if line is a comment ignore it
-		if (trimmedLine.find(Constant::KEYWORD_COMMENT_BLOCK) != string::npos ||
-			trimmedLine.find(Constant::KEYWORD_COMMENT_LINE_START) != string::npos ||
-			trimmedLine.find(Constant::KEYWORD_COMMENT_LINE_END) != string::npos) {
+		//if line comment just ignore
+		if (trimmedLine.find(Constant::KEYWORD_COMMENT_BLOCK) != string::npos) {
+			continue;
+		}
+		//if block comment start
+		else if (trimmedLine.find(Constant::KEYWORD_COMMENT_LINE_START) != string::npos) {
+			isCommentFound = true;
+			continue;
+		}
+		//if block comment end
+		else if (trimmedLine.find(Constant::KEYWORD_COMMENT_LINE_END) != string::npos) {
+			isCommentFound = false;
 			continue;
 		}
 		else {
 			//Create a new Line object
 			Line newLine(lineNumber, trimmedLine);
+			if (!isCommentFound) {
+				lines.push_back(newLine);
 
-			lines.push_back(newLine);
-
-			//increase the line number
-			lineNumber++;
+				//increase the line number
+				lineNumber++;
+			}
 		}
 
 	}
 
+	//control and remove function signature
+	Line signature = lines.front();
 
-	//control and remove function signutre
+	//remove signature of function
 	lines.pop_front();
 
 	//remove last bracket

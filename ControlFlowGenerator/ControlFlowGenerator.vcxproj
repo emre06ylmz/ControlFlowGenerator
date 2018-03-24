@@ -148,6 +148,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="BasicBlock.h" />
+    <ClInclude Include="BasicBlockProcessor.h" />
     <ClInclude Include="Constant.h" />
     <ClInclude Include="Line.h" />
     <ClInclude Include="OutputProcessor.h" />
@@ -158,6 +159,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BasicBlock.cpp" />
+    <ClCompile Include="BasicBlockProcessor.cpp" />
     <ClCompile Include="Constant.cpp" />
     <ClCompile Include="ControlFlowGenerator.cpp" />
     <ClCompile Include="Line.cpp" />
