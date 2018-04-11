@@ -17,6 +17,7 @@ public:
 	virtual ~Constant();
 	static string KEYWORD_IF;
 	static string KEYWORD_ELSE;
+	static string KEYWORD_RETURN;
 	static string KEYWORD_WHILE;
 	static string KEYWORD_FOR;
 	static string KEYWORD_CLOSE_BRACKET;

@@ -82,22 +82,32 @@ void OutputProcessor::outputPaths(list<BasicBlock> basicBlocks){
 
 void OutputProcessor::addPath(string previous, BasicBlock basicBlockList[], int index){
 	BasicBlock block = basicBlockList[index];
-	if(block.getLineType() == Constant::LINE_TYPE_END){
+	if(block.getLineType() == Constant::LINE_TYPE_END || block.getNumber() == -2){
 		cout << previous << "-END"<< endl;
 	} else {
 		list<int> edges = block.getEdges();
 		if(edges.size() == 0){
 			cout << previous << " - ";
-			cout << "NOT PATH" << endl;
+			cout << "-ERROR" << endl;
 		} else{
 			for (list<int>::iterator iteratorEdge = edges.begin(); iteratorEdge != edges.end(); ++iteratorEdge) {
 				int newIndex = (*iteratorEdge);
-				std::stringstream ss;
-				ss << previous << "-" << newIndex;
-				std::string value = ss.str();
+				if(newIndex == -2){
+					cout << previous << "-END"<< endl;
+				} else if(newIndex > index) {
+					std::stringstream ss;
+					ss << previous << "-" << newIndex;
+					std::string value = ss.str();
 
-				//cout << "go: "<< iteratorEdge << " size:" << iteratorEdge->getEdges().size() << endl;
-				OutputProcessor::addPath(value, basicBlockList, newIndex);
+					//cout << "go: "<< iteratorEdge << " size:" << iteratorEdge->getEdges().size() << endl;
+					OutputProcessor::addPath(value, basicBlockList, newIndex);
+				} else{
+					std::stringstream ss;
+					ss << previous << "-" << newIndex;
+					std::string value = ss.str();
+					cout << value << "-LOOP" <<endl;
+				}
+
 			}
 		}
 	}

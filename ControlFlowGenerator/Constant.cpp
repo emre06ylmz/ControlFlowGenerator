@@ -18,6 +18,8 @@ Constant::~Constant() {
 
 string Constant::KEYWORD_IF = "if(";
 string Constant::KEYWORD_ELSE = "else";
+string Constant::KEYWORD_RETURN = "return";
+
 string Constant::KEYWORD_WHILE = "while(";
 string Constant::KEYWORD_FOR = "for(";
 string Constant::KEYWORD_CLOSE_BRACKET = "}";

@@ -75,31 +75,52 @@ list<BasicBlock> BasicBlockProcessor::createBasicBlocks(list<Line> lines) {
 		/* close */
 		else if (trimmedLine.find(Constant::KEYWORD_CLOSE_BRACKET) != string::npos) {
 			//currentBasicBlock.setLineType(Constant::LINE_TYPE_CLOSE);
+			if(currentBasicBlock.getLines().size() > 0){
+				basicBlocks.push_back(currentBasicBlock);
+				currentBasicBlock = *new BasicBlock(basicBlockNumber);
+				basicBlockNumber++;
+				//cout << "KEYWORD_CLOSE_BRACKET: "<< currentBasicBlock.getNumber() << endl;
+				//cout << "size: "<< basicBlocks.size() << endl;
+				// TODO if it is loop closing node, sign it
+				int deep = 0;
+				for (list<BasicBlock>::iterator iteratorSecond = basicBlocks.end(); iteratorSecond != basicBlocks.begin(); --iteratorSecond) {
+					//cout << " "<< iteratorSecond->getNumber() << " type: " << iteratorSecond->getLineType() << "     ";
+
+					//if loop close
+					if (iteratorSecond->getNumber() < basicBlocks.size() && iteratorSecond->getIsLabel() == true) {
+						deep++;
+						//cout << iteratorSecond->getNumber() << " deep: "<< iteratorSecond->getIsLabel() << endl;
+					} else if (iteratorSecond->getNumber() < basicBlocks.size() && iteratorSecond->getLineType() == Constant::LINE_TYPE_LOOP) {
+						if(deep == 0){
+							currentBasicBlock.setLineType(Constant::LINE_TYPE_LOOP_CLOSE);
+							currentBasicBlock.setIsLabel(true);
+							iteratorSecond->addEdge(currentBasicBlock.getNumber());
+
+							int destinationNumber = iteratorSecond->getNumber();
+							(++iteratorSecond)->addEdge(destinationNumber);
+
+							//cout << " - found";
+							//cout << "deep addEdge: "<< iteratorSecond->getNumber() << " - " << currentBasicBlock.getNumber() << endl;
+							break;
+						}else{
+							deep--;
+
+						}
+
+					}
+				}
+			} else{
+				//no element only closing tag
+			}
+
+		}
+		/* return */
+		else if (trimmedLine.find(Constant::KEYWORD_RETURN) != string::npos) {
+			currentBasicBlock.addEdge(-2);
+			currentBasicBlock.addLine(newLine);
 			basicBlocks.push_back(currentBasicBlock);
 			currentBasicBlock = *new BasicBlock(basicBlockNumber);
 			basicBlockNumber++;
-			//cout << "KEYWORD_CLOSE_BRACKET: "<< currentBasicBlock.getNumber() << endl;
-			// TODO if it is loop closing node, sign it
-			int deep = 0;
-			for (list<BasicBlock>::iterator iteratorSecond = basicBlocks.end(); iteratorSecond != basicBlocks.begin(); --iteratorSecond) {
-				//if loop close
-				if (iteratorSecond->getIsLabel() == true) {
-					deep++;
-
-					//cout << "deep: "<< iteratorSecond->getIsLabel() << endl;
-				} else if (iteratorSecond->getLineType() == Constant::LINE_TYPE_LOOP) {
-					if(deep == 0){
-						currentBasicBlock.setLineType(Constant::LINE_TYPE_LOOP_CLOSE);
-						currentBasicBlock.setIsLabel(true);
-						iteratorSecond->addEdge(currentBasicBlock.getNumber());
-						//cout << "deep addEdge: "<< iteratorSecond->getNumber() << " - " << currentBasicBlock.getNumber() << endl;
-						continue;
-					}else{
-						deep--;
-					}
-
-				}
-			}
 		}
 		/* basic line */
 		else {
@@ -111,7 +132,7 @@ list<BasicBlock> BasicBlockProcessor::createBasicBlocks(list<Line> lines) {
 		lineNumber++;
 	}
 
-	if(currentBasicBlock.getLineType() == Constant::LINE_TYPE_EXPRESSION){
+	if(currentBasicBlock.getLines().size() > 0){
 		basicBlocks.push_back(currentBasicBlock);
 	}
 
@@ -142,8 +163,28 @@ list<BasicBlock> BasicBlockProcessor::createEdges(list<BasicBlock> basicBlocks) 
 				// TODO create a stack to find true indentation
 				for (list<BasicBlock>::iterator iteratorSecond = iterator; iteratorSecond != basicBlocks.end(); ++iteratorSecond) {
 					if (iteratorSecond->getLineType() != Constant::LINE_TYPE_IF && iteratorSecond->getLineType() != Constant::LINE_TYPE_ELSE) {
-						iterator->addEdge(iteratorSecond->getNumber());
-						break;
+						bool isExit = false;
+						int size = iteratorSecond->getEdges().size();
+
+						cout << "size: " << size << endl;
+
+						if(size > 0){
+
+							for (list<int>::iterator iteratorEdge = iteratorSecond->getEdges().begin(); iteratorEdge != iteratorSecond->getEdges().end(); ++iteratorEdge) {
+								int newIndex = (*iteratorEdge);
+								cout << " " << newIndex << " size: " << size << endl;
+								if(newIndex == -2){
+									isExit = true;
+									break;
+								}
+							}
+
+							if(!isExit){
+								//iterator->addEdge(iteratorSecond->getNumber());
+								break;
+							}
+
+						}
 					}
 				}
 
@@ -152,7 +193,19 @@ list<BasicBlock> BasicBlockProcessor::createEdges(list<BasicBlock> basicBlocks) 
 				// TODO create a stack to find true indentation
 				for (list<BasicBlock>::iterator iteratorSecond = iterator; iteratorSecond != basicBlocks.begin(); --iteratorSecond) {
 					if (iteratorSecond->getLineType() == Constant::LINE_TYPE_IF_PREVIOUS) {
-						iteratorSecond->addEdge(iterator->getNumber());
+						bool isExit = false;
+
+						for (list<int>::iterator iteratorEdge = iteratorSecond->getEdges().begin(); iteratorEdge != iteratorSecond->getEdges().end(); ++iteratorEdge) {
+							int newIndex = (*iteratorEdge);
+							if(newIndex == -2){
+								isExit = true;
+								break;
+							}
+						}
+						if(!isExit){
+							iteratorSecond->addEdge(iterator->getNumber());
+							break;
+						}
 					}
 				}
 				auto next = std::next(iterator, 1);
