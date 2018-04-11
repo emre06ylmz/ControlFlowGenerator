@@ -1,14 +1,19 @@
-#include "stdafx.h"
+/*
+ * Util.cpp
+ *
+ *  Created on: 7 Nis 2018
+ *      Author: emreyilmaz
+ */
+
 #include "Util.h"
 
-using namespace std;
+Util::Util() {
+	// TODO Auto-generated constructor stub
 
-Util::Util()
-{
 }
 
-Util::~Util()
-{
+Util::~Util() {
+	// TODO Auto-generated destructor stub
 }
 
 string Util::trim(const string& str)
@@ -20,17 +25,18 @@ string Util::trim(const string& str)
 }
 
 BasicBlock Util::createStartBasicBlock(){
-	BasicBlock startBasicBlock;
+	BasicBlock startBasicBlock = BasicBlock(-1);
 	Line startLine(0, "START");
 	startBasicBlock.addLine(startLine);
-	startBasicBlock.setLineType(Constant::LINE_TYPE_EXPRESSION);
+	startBasicBlock.setLineType(Constant::LINE_TYPE_START);
 	return startBasicBlock;
 }
 
 BasicBlock Util::createEndBasicBlock() {
-	BasicBlock endBasicBlock;
+	BasicBlock endBasicBlock = BasicBlock(-2);
 	Line endLine(0, "END");
 	endBasicBlock.addLine(endLine);
-	endBasicBlock.setLineType(Constant::LINE_TYPE_EXPRESSION);
+	endBasicBlock.setLineType(Constant::LINE_TYPE_END);
 	return endBasicBlock;
 }
+

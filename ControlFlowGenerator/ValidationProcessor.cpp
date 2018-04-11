@@ -1,13 +1,19 @@
-#include "stdafx.h"
-#include "ValidationProcessor.h"
-#include <iostream>
+/*
+ * ValidationProcessor.cpp
+ *
+ *  Created on: 7 Nis 2018
+ *      Author: emreyilmaz
+ */
 
-ValidationProcessor::ValidationProcessor()
-{
+#include "ValidationProcessor.h"
+
+ValidationProcessor::ValidationProcessor() {
+	// TODO Auto-generated constructor stub
+
 }
 
-ValidationProcessor::~ValidationProcessor()
-{
+ValidationProcessor::~ValidationProcessor() {
+	// TODO Auto-generated destructor stub
 }
 
 list<Line> ValidationProcessor::readAndValidateInput(int argc, char* argv[]) {

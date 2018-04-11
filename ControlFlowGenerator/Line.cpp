@@ -1,9 +1,15 @@
-#include "stdafx.h"
+/*
+ * Line.cpp
+ *
+ *  Created on: 7 Nis 2018
+ *      Author: emreyilmaz
+ */
+
 #include "Line.h"
 
-using namespace std;
-
 Line::Line() {
+	// TODO Auto-generated constructor stub
+
 }
 
 Line::Line(int _lineNumber, string _expression) {
@@ -12,8 +18,8 @@ Line::Line(int _lineNumber, string _expression) {
 	lineType = 0;
 }
 
-Line::~Line()
-{
+Line::~Line() {
+	// TODO Auto-generated destructor stub
 }
 
 int Line::getLineNumber() {

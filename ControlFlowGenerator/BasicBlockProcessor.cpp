@@ -1,13 +1,19 @@
-#include "stdafx.h"
+/*
+ * BasicBlockProcessor.cpp
+ *
+ *  Created on: 7 Nis 2018
+ *      Author: emreyilmaz
+ */
+
 #include "BasicBlockProcessor.h"
 
+BasicBlockProcessor::BasicBlockProcessor() {
+	// TODO Auto-generated constructor stub
 
-BasicBlockProcessor::BasicBlockProcessor()
-{
 }
 
-BasicBlockProcessor::~BasicBlockProcessor()
-{
+BasicBlockProcessor::~BasicBlockProcessor() {
+	// TODO Auto-generated destructor stub
 }
 
 list<BasicBlock> BasicBlockProcessor::createBasicBlocks(list<Line> lines) {
@@ -15,11 +21,13 @@ list<BasicBlock> BasicBlockProcessor::createBasicBlocks(list<Line> lines) {
 
 	Line newLine;
 	int lineNumber;
-	BasicBlock bk;
+	int basicBlockNumber = 1;
+	BasicBlock currentBasicBlock;
 
 	//initialize variables
-	lineNumber = 1;
-	bk = *new BasicBlock();
+	lineNumber = 0;
+	currentBasicBlock = *new BasicBlock(basicBlockNumber);
+	basicBlockNumber++;
 
 	//Create first basic block
 	BasicBlock startBasicBlock = Util::createStartBasicBlock();
@@ -32,48 +40,79 @@ list<BasicBlock> BasicBlockProcessor::createBasicBlocks(list<Line> lines) {
 
 		/* if */
 		if (trimmedLine.find(Constant::KEYWORD_IF) != string::npos) {
-			newLine.setLineType(Constant::LINE_TYPE_IF);
-			bk.addLine(newLine);
-			basicBlocks.push_back(bk);
+			currentBasicBlock.setLineType(Constant::LINE_TYPE_IF_PREVIOUS);
+			currentBasicBlock.addLine(newLine);
+			basicBlocks.push_back(currentBasicBlock);
 
-			bk = *new BasicBlock();
+			currentBasicBlock = *new BasicBlock(basicBlockNumber);
+			basicBlockNumber++;
+			currentBasicBlock.setLineType(Constant::LINE_TYPE_IF);
 		}
 		/* while */
-		else if (trimmedLine.find(Constant::KEYWORD_WHILE) != string::npos) {
-			basicBlocks.push_back(bk);
+		else if (trimmedLine.find(Constant::KEYWORD_WHILE) != string::npos ||
+				trimmedLine.find(Constant::KEYWORD_FOR) != string::npos) {
+			currentBasicBlock.setLineType(Constant::LINE_TYPE_LOOP_PREVIOUS);
+			basicBlocks.push_back(currentBasicBlock);
 
-			newLine.setLineType(Constant::LINE_TYPE_WHILE);
+			currentBasicBlock = *new BasicBlock(basicBlockNumber);
+			basicBlockNumber++;
+			currentBasicBlock.setLineType(Constant::LINE_TYPE_LOOP);
+			currentBasicBlock.addLine(newLine);
+			basicBlocks.push_back(currentBasicBlock);
 
-			bk = *new BasicBlock();
-			bk.addLine(newLine);
-			basicBlocks.push_back(bk);
-
-			bk = *new BasicBlock();
+			currentBasicBlock = *new BasicBlock(basicBlockNumber);
+			basicBlockNumber++;
 		}
 		/* else */
 		else if (trimmedLine.find(Constant::KEYWORD_ELSE) != string::npos) {
-			bk.setLineType(Constant::LINE_TYPE_ELSE);
-			bk.addLine(newLine);
-			basicBlocks.push_back(bk);
-			bk = *new BasicBlock();
+			//basicBlocks.push_back(currentBasicBlock);
+			//currentBasicBlock = *new BasicBlock(basicBlockNumber);
+			//basicBlockNumber++;
+			currentBasicBlock.setLineType(Constant::LINE_TYPE_ELSE);
+
+			// TODO if there is no if closing tag handle it
 		}
 		/* close */
 		else if (trimmedLine.find(Constant::KEYWORD_CLOSE_BRACKET) != string::npos) {
-			newLine.setLineType(Constant::LINE_TYPE_CLOSE);
-			bk.addLine(newLine);
+			//currentBasicBlock.setLineType(Constant::LINE_TYPE_CLOSE);
+			basicBlocks.push_back(currentBasicBlock);
+			currentBasicBlock = *new BasicBlock(basicBlockNumber);
+			basicBlockNumber++;
+			//cout << "KEYWORD_CLOSE_BRACKET: "<< currentBasicBlock.getNumber() << endl;
+			// TODO if it is loop closing node, sign it
+			int deep = 0;
+			for (list<BasicBlock>::iterator iteratorSecond = basicBlocks.end(); iteratorSecond != basicBlocks.begin(); --iteratorSecond) {
+				//if loop close
+				if (iteratorSecond->getIsLabel() == true) {
+					deep++;
 
-			bk.setLineType(Constant::LINE_TYPE_CLOSE);
-			basicBlocks.push_back(bk);
-			bk = *new BasicBlock();
+					//cout << "deep: "<< iteratorSecond->getIsLabel() << endl;
+				} else if (iteratorSecond->getLineType() == Constant::LINE_TYPE_LOOP) {
+					if(deep == 0){
+						currentBasicBlock.setLineType(Constant::LINE_TYPE_LOOP_CLOSE);
+						currentBasicBlock.setIsLabel(true);
+						iteratorSecond->addEdge(currentBasicBlock.getNumber());
+						//cout << "deep addEdge: "<< iteratorSecond->getNumber() << " - " << currentBasicBlock.getNumber() << endl;
+						continue;
+					}else{
+						deep--;
+					}
+
+				}
+			}
 		}
 		/* basic line */
 		else {
-			newLine.setLineType(Constant::LINE_TYPE_EXPRESSION);
-			bk.addLine(newLine);
+			currentBasicBlock.addLine(newLine);
+			//cout << newLine.getExpression() << " " << currentBasicBlock.getNumber() << endl;
 		}
 
 		//increase the line number
 		lineNumber++;
+	}
+
+	if(currentBasicBlock.getLineType() == Constant::LINE_TYPE_EXPRESSION){
+		basicBlocks.push_back(currentBasicBlock);
 	}
 
 	//Create last basic block
@@ -87,59 +126,47 @@ list<BasicBlock> BasicBlockProcessor::createBasicBlocks(list<Line> lines) {
 list<BasicBlock> BasicBlockProcessor::createEdges(list<BasicBlock> basicBlocks) {
 	//Iterate all basic blocks
 	for (list<BasicBlock>::iterator iterator = basicBlocks.begin(); iterator != basicBlocks.end(); ++iterator) {
-		BasicBlock currentBasicBlock = (*iterator);
-		list<Line> currentLineList = currentBasicBlock.getLines();
 
-		if (currentBasicBlock.getLineType() == Constant::LINE_TYPE_EXPRESSION) {
-			Line current = (*currentLineList.begin());
-			if (current.getLineNumber() == 0) {
-				//START
-			}
-			else {
-				auto nx = std::prev(iterator, 1);
-				BasicBlock previous = *(nx);
+		list<Line> currentLineList = iterator->getLines();
 
-				previous.addEdge(currentBasicBlock);
+		if (iterator->getLineType() == Constant::LINE_TYPE_START) {//start
+			auto next = std::next(iterator, 1);
+			iterator->addEdge(next->getNumber());
+		} else if (iterator->getLineType() == Constant::LINE_TYPE_END) {//end
+			auto prev = std::prev(iterator, 1);
+			prev->addEdge(iterator->getNumber());
+		} else{//at middle
+			auto prev = std::prev(iterator, 1);
+			if(iterator->getLineType() == Constant::LINE_TYPE_IF){//previous node if
+				prev->addEdge(iterator->getNumber());
+				// TODO create a stack to find true indentation
+				for (list<BasicBlock>::iterator iteratorSecond = iterator; iteratorSecond != basicBlocks.end(); ++iteratorSecond) {
+					if (iteratorSecond->getLineType() != Constant::LINE_TYPE_IF && iteratorSecond->getLineType() != Constant::LINE_TYPE_ELSE) {
+						iterator->addEdge(iteratorSecond->getNumber());
+						break;
+					}
+				}
+
+			} else if(iterator->getLineType() == Constant::LINE_TYPE_ELSE){//previous node else
+				//backtrack and find previous node before if
+				// TODO create a stack to find true indentation
+				for (list<BasicBlock>::iterator iteratorSecond = iterator; iteratorSecond != basicBlocks.begin(); --iteratorSecond) {
+					if (iteratorSecond->getLineType() == Constant::LINE_TYPE_IF_PREVIOUS) {
+						iteratorSecond->addEdge(iterator->getNumber());
+					}
+				}
+				auto next = std::next(iterator, 1);
+				iterator->addEdge(next->getNumber());
+			} else if(iterator->getLineType() == Constant::LINE_TYPE_LOOP){//previous node if
+				auto next = std::next(iterator, 1);
+				prev->addEdge(iterator->getNumber());
+				iterator->addEdge(next->getNumber());
+			} else if(iterator->getLineType() == Constant::LINE_TYPE_LOOP_PREVIOUS){//previous node if
+				//prev->addEdge((*iterator));
 			}
 
 		}
-
-		else if (currentBasicBlock.getLineType() == Constant::LINE_TYPE_IF) {
-			//if previous is expression assign it
-			auto nx = std::prev(iterator, 1);
-			BasicBlock previous = *(nx);
-			if (previous.getLineType() == Constant::LINE_TYPE_EXPRESSION) {
-				previous.addEdge(currentBasicBlock);
-			}
-			else if (previous.getLineType() == Constant::LINE_TYPE_IF) {
-				previous.addEdge(currentBasicBlock);
-			}
-			else if (previous.getLineType() == Constant::LINE_TYPE_WHILE) {
-				previous.addEdge(currentBasicBlock);
-			}
-			else if (previous.getLineType() == Constant::LINE_TYPE_CLOSE) {
-				previous.addEdge(currentBasicBlock);
-			}
-			else {
-				for (list<BasicBlock>::iterator iteratorSecond = iterator; iteratorSecond != basicBlocks.begin(); --iteratorSecond) {
-					BasicBlock previousBasicBlock = (*iteratorSecond);
-					if (previous.getLineType() == Constant::LINE_TYPE_EXPRESSION) {
-						previous.addEdge(currentBasicBlock);
-					}
-				}
-			}
-
-		}/*
-		 else if (currentBasicBlock.getLineType() == Constant::LINE_TYPE_EXPRESSION) {
-
-		 }
-		 else if (currentBasicBlock.getLineType() == Constant::LINE_TYPE_EXPRESSION) {
-
-		 }
-		 */
-
 	}
-
 
 	return basicBlocks;
 }
