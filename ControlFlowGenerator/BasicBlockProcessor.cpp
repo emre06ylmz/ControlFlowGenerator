@@ -42,13 +42,14 @@ list<BasicBlock> BasicBlockProcessor::createBasicBlocks(list<Line> lines) {
 		if (trimmedLine.find(Constant::KEYWORD_IF) != string::npos) {
 			currentBasicBlock.setLineType(Constant::LINE_TYPE_IF_PREVIOUS);
 			currentBasicBlock.addLine(newLine);
+			currentBasicBlock.addEdge(basicBlockNumber);
 			basicBlocks.push_back(currentBasicBlock);
 
 			currentBasicBlock = *new BasicBlock(basicBlockNumber);
 			basicBlockNumber++;
 			currentBasicBlock.setLineType(Constant::LINE_TYPE_IF);
 		}
-		/* while */
+		/* while or for*/
 		else if (trimmedLine.find(Constant::KEYWORD_WHILE) != string::npos ||
 				trimmedLine.find(Constant::KEYWORD_FOR) != string::npos) {
 			currentBasicBlock.setLineType(Constant::LINE_TYPE_LOOP_PREVIOUS);
@@ -58,6 +59,7 @@ list<BasicBlock> BasicBlockProcessor::createBasicBlocks(list<Line> lines) {
 			basicBlockNumber++;
 			currentBasicBlock.setLineType(Constant::LINE_TYPE_LOOP);
 			currentBasicBlock.addLine(newLine);
+			currentBasicBlock.addEdge(basicBlockNumber);
 			basicBlocks.push_back(currentBasicBlock);
 
 			currentBasicBlock = *new BasicBlock(basicBlockNumber);
@@ -72,7 +74,7 @@ list<BasicBlock> BasicBlockProcessor::createBasicBlocks(list<Line> lines) {
 
 			// TODO if there is no if closing tag handle it
 		}
-		/* close */
+		/* close bracket*/
 		else if (trimmedLine.find(Constant::KEYWORD_CLOSE_BRACKET) != string::npos) {
 			//currentBasicBlock.setLineType(Constant::LINE_TYPE_CLOSE);
 			if(currentBasicBlock.getLines().size() > 0){
@@ -86,28 +88,22 @@ list<BasicBlock> BasicBlockProcessor::createBasicBlocks(list<Line> lines) {
 				for (list<BasicBlock>::iterator iteratorSecond = basicBlocks.end(); iteratorSecond != basicBlocks.begin(); --iteratorSecond) {
 					//cout << " "<< iteratorSecond->getNumber() << " type: " << iteratorSecond->getLineType() << "     ";
 
-					//if loop close
-					if (iteratorSecond->getNumber() < basicBlocks.size() && iteratorSecond->getIsLabel() == true) {
-						deep++;
-						//cout << iteratorSecond->getNumber() << " deep: "<< iteratorSecond->getIsLabel() << endl;
-					} else if (iteratorSecond->getNumber() < basicBlocks.size() && iteratorSecond->getLineType() == Constant::LINE_TYPE_LOOP) {
-						if(deep == 0){
-							currentBasicBlock.setLineType(Constant::LINE_TYPE_LOOP_CLOSE);
-							currentBasicBlock.setIsLabel(true);
+					//found if, else or loop
+					if(iteratorSecond->getLineType() == Constant::LINE_TYPE_IF_PREVIOUS ||
+							iteratorSecond->getLineType() == Constant::LINE_TYPE_ELSE_PREVIOUS ||
+							iteratorSecond->getLineType() == Constant::LINE_TYPE_LOOP){
+						//if it not closed yet
+						if(iteratorSecond->getIsClosedl() == false){
+							iteratorSecond->setIsClosed(true);
 							iteratorSecond->addEdge(currentBasicBlock.getNumber());
-
-							int destinationNumber = iteratorSecond->getNumber();
-							(++iteratorSecond)->addEdge(destinationNumber);
-
-							//cout << " - found";
-							//cout << "deep addEdge: "<< iteratorSecond->getNumber() << " - " << currentBasicBlock.getNumber() << endl;
+							if(iteratorSecond->getLineType() == Constant::LINE_TYPE_LOOP){
+								int destinationNumber = iteratorSecond->getNumber();
+								(++iteratorSecond)->addEdge(destinationNumber);
+							}
 							break;
-						}else{
-							deep--;
-
 						}
-
 					}
+
 				}
 			} else{
 				//no element only closing tag
@@ -159,6 +155,7 @@ list<BasicBlock> BasicBlockProcessor::createEdges(list<BasicBlock> basicBlocks) 
 		} else{//at middle
 			auto prev = std::prev(iterator, 1);
 			if(iterator->getLineType() == Constant::LINE_TYPE_IF){//previous node if
+
 				prev->addEdge(iterator->getNumber());
 				// TODO create a stack to find true indentation
 				for (list<BasicBlock>::iterator iteratorSecond = iterator; iteratorSecond != basicBlocks.end(); ++iteratorSecond) {
@@ -166,13 +163,10 @@ list<BasicBlock> BasicBlockProcessor::createEdges(list<BasicBlock> basicBlocks) 
 						bool isExit = false;
 						int size = iteratorSecond->getEdges().size();
 
-						cout << "size: " << size << endl;
-
 						if(size > 0){
 
 							for (list<int>::iterator iteratorEdge = iteratorSecond->getEdges().begin(); iteratorEdge != iteratorSecond->getEdges().end(); ++iteratorEdge) {
 								int newIndex = (*iteratorEdge);
-								cout << " " << newIndex << " size: " << size << endl;
 								if(newIndex == -2){
 									isExit = true;
 									break;

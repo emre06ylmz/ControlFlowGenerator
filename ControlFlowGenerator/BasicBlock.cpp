@@ -11,12 +11,14 @@ BasicBlock::BasicBlock() {
 	// TODO Auto-generated constructor stub
 	lineType = Constant::LINE_TYPE_EXPRESSION;
 	isLabel = false;
+	isClosed = false;
 }
 
 BasicBlock::BasicBlock(int _number) {
 	// TODO Auto-generated constructor stub
 	number = _number;
 	isLabel = false;
+	isClosed = false;
 }
 
 BasicBlock::~BasicBlock() {
@@ -36,7 +38,17 @@ void BasicBlock::addLine(Line line) {
 }
 
 void BasicBlock::addEdge(int basicBlock) {
-	edges.push_back(basicBlock);
+	bool isFound = false;
+	for (list<int>::iterator iteratorEdge = edges.begin(); iteratorEdge != edges.end(); ++iteratorEdge) {
+		int newIndex = (*iteratorEdge);
+		if(newIndex == basicBlock){
+			isFound = true;
+		}
+	}
+	if(isFound == false){
+		edges.push_back(basicBlock);
+	}
+
 }
 
 int BasicBlock::getLineType() {
@@ -61,4 +73,12 @@ bool BasicBlock::getIsLabel() {
 
 void BasicBlock::setIsLabel(bool _isLabel) {
 	isLabel = _isLabel;
+}
+
+bool BasicBlock::getIsClosedl() {
+	return isClosed;
+}
+
+void BasicBlock::setIsClosed(bool _isClosed) {
+	isClosed = _isClosed;
 }

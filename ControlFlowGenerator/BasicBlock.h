@@ -30,6 +30,8 @@ public:
 	void setNumber(int _number);
 	bool getIsLabel();
 	void setIsLabel(bool _isLabel);
+	bool getIsClosedl();
+	void setIsClosed(bool _isClosedl);
 
 private:
 	list<Line> lines;
@@ -37,6 +39,7 @@ private:
 	int lineType;
 	int number;
 	bool isLabel;
+	bool isClosed;
 };
 
 #endif /* BASICBLOCK_H_ */

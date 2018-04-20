@@ -18,6 +18,7 @@ ValidationProcessor::~ValidationProcessor() {
 
 list<Line> ValidationProcessor::readAndValidateInput(int argc, char* argv[]) {
 
+	// list of lines
 	list<Line> lines;
 
 	//control program argument
@@ -29,16 +30,23 @@ list<Line> ValidationProcessor::readAndValidateInput(int argc, char* argv[]) {
 
 	//Create a file stream
 	ifstream sourceCode(argv[1]);
-	string line;
-	int lineNumber = 1;
-	//Read file line by line
 
+	// to read line
+	string line;
+
+	int lineNumber = 0;
+
+	//block comment operation
 	bool isCommentFound = false;
 
+	//Read file line by line
 	while (getline(sourceCode, line))
 	{
 		//Trim line
 		string trimmedLine = Util::trim(line);
+
+		//increase the line number
+		lineNumber++;
 
 		//if line comment just ignore
 		if (trimmedLine.find(Constant::KEYWORD_COMMENT_BLOCK) != string::npos) {
@@ -60,8 +68,6 @@ list<Line> ValidationProcessor::readAndValidateInput(int argc, char* argv[]) {
 			if (!isCommentFound) {
 				lines.push_back(newLine);
 
-				//increase the line number
-				lineNumber++;
 			}
 		}
 

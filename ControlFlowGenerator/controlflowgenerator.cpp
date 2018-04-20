@@ -33,13 +33,16 @@ int main(int argc, char* argv[]) {
 	//create basic block edges
 	list<BasicBlock> basicBlocks = BasicBlockProcessor::createEdges(basicBlocksSimple);
 
-	// Print the file path:
+	// print basic blocks
 	OutputProcessor::outputBasicBlocks(basicBlocks);
 
+	//print  detailed basic blocks
 	OutputProcessor::outputBasicBlocksDetailed(basicBlocks);
 
+	//print edges of basic blocks
 	OutputProcessor::outputBasicBlockEdges(basicBlocks);
 
+	//print all paths
 	OutputProcessor::outputPaths(basicBlocks);
 
 	return 0;
